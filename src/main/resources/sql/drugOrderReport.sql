@@ -44,9 +44,8 @@ FROM
      LEFT JOIN encounter_provider ON encounter_provider.encounter_id = orders.encounter_id
      LEFT JOIN provider ON provider.provider_id = encounter_provider.provider_id
      LEFT JOIN person_name pro ON pro.person_id = provider.person_id
+     WHERE NOT EXISTS (SELECT 1 FROM orders revised_order WHERE revised_order.previous_order_id = orders.order_id)
+     AND (IF(Date(orders.scheduled_date) IS NULL, Date(orders.date_activated), Date(orders.scheduled_date))) <= "#endDate#"
+     AND (IF(Date(orders.date_stopped) IS NULL, Date(orders.auto_expire_date), Date(orders.date_stopped)) >= "#startDate#" OR (orders.date_stopped IS NULL AND orders.auto_expire_date IS NULL))
   ) p
-WHERE
-  p.startDate <= "#endDate#"
-  AND
-  (p.stopDate >= "#startDate#" OR p.stopDate IS NULL)
 ORDER BY patientId;
